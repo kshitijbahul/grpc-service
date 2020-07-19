@@ -1,10 +1,7 @@
 package com.kshitij.pocs.grpc.greeting.client;
 
 import com.proto.dummy.DummyServiceGrpc;
-import com.proto.greet.GreetResponse;
-import com.proto.greet.GreetServiceGrpc;
-import com.proto.greet.Greeting;
-import com.proto.greet.GreetingRequest;
+import com.proto.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -34,6 +31,31 @@ public class GreetingClient {
         //Print the result
         System.out.println("The respons is "+greetResponse);
         System.out.println("Shutting down client");
+
+
+        /**
+         * Trying the Sum Service
+         */
+
+       SumServiceGrpc.SumServiceBlockingStub sumServiceBlockingStub = SumServiceGrpc.newBlockingStub(channel);
+       Sum sum= Sum.newBuilder().setFirstNumber(Integer.MAX_VALUE).setSecondNumber(Integer.MAX_VALUE).build();
+       SumRequest sumRequest= SumRequest.newBuilder().setRequest(sum).build();
+
+       SumResponse sumResponse=sumServiceBlockingStub.addNumbers(sumRequest);
+       System.out.println("Got the Sum of 2 number's over gRPC, its excessive but necessary "+sumResponse.getResult());
+
+
+
+       //Server Streaming
+        /*greetServiceBlockingStub.greetManyTimes(GreetManyTimesRequest.newBuilder().setGreeting(Greeting.newBuilder().setFirstName("Kshitij").build()).build())
+                .forEachRemaining((eachResponse)->{
+                    System.out.println("The response I am getting is "+eachResponse.getResponse());
+                });*/
+
+        //Get Prime numbers
+
+        sumServiceBlockingStub.primeNumbers(PrimeNumberRequest.newBuilder().setNumber(120).build())
+                .forEachRemaining(eachPrimeNumber-> System.out.println("Response is "+ eachPrimeNumber.getResponse()));
         channel.shutdown();
     }
 }

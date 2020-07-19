@@ -1,0 +1,29 @@
+syntax= "proto3";
+
+option java_package="com.proto.greet";
+option java_multiple_files=true;
+
+message Sum {
+  int32 first_number=1;
+  int32 second_number=2;
+}
+
+message SumRequest{
+  Sum request=1;
+}
+
+message SumResponse{
+  int64 result=1;
+}
+message PrimeNumberRequest{
+  int32 number=1;
+}
+
+message PrimeNumberResponse{
+  int32 response=1;
+}
+
+service SumService{
+  rpc AddNumbers(SumRequest) returns (SumResponse){};
+  rpc PrimeNumbers(PrimeNumberRequest) returns(stream PrimeNumberResponse){}
+}

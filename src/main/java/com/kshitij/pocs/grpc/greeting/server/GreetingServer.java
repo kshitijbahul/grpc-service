@@ -11,6 +11,7 @@ public class GreetingServer {
         Server server = ServerBuilder.forPort(50051)
                 //Adding the service to the server when it starts
                 .addService(new GreetServiceImpl())
+                .addService(new SumServiceImpl())//Adding the Sum Service to the server
                 .build();
         server.start();//Start The server
         //Add a shutdown hook

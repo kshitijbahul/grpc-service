@@ -1,9 +1,6 @@
 package com.kshitij.pocs.grpc.greeting.server;
 
-import com.proto.greet.GreetResponse;
-import com.proto.greet.GreetServiceGrpc;
-import com.proto.greet.Greeting;
-import com.proto.greet.GreetingRequest;
+import com.proto.greet.*;
 import io.grpc.stub.StreamObserver;
 
 //gRPC plugin code
@@ -20,5 +17,25 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
         responseObserver.onNext(greetResponse);//Sending the response to the client
         responseObserver.onCompleted();//Marking it completed
         //super.greet(request, responseObserver);
+    }
+
+    @Override
+    public void greetManyTimes(GreetManyTimesRequest request, StreamObserver<GreetManyTimesResponse> responseObserver) {
+        String firstName = request.getGreeting().getFirstName();
+        try {
+            for (int i = 0; i < 10; i++) {
+                String result = "Hello " + firstName + " this is the " + i + "th response.";
+                GreetManyTimesResponse response = GreetManyTimesResponse.newBuilder().setResponse(result).build();
+                responseObserver.onNext(response);
+
+                Thread.sleep(1000);
+            }
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+         finally {
+            responseObserver.onCompleted();
+        }
     }
 }
