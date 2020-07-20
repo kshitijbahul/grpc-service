@@ -1,6 +1,7 @@
 package com.kshitij.pocs.grpc.greeting.server;
 
 import com.proto.greet.*;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 //gRPC plugin code
@@ -87,5 +88,22 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
             }
         };
         return twoWayRequestStreamObserver;
+    }
+
+    @Override
+    public void squareRoot(SquareRootRequest request, StreamObserver<SquareRootResponse> responseObserver) {
+        Integer number=request.getNumber();
+        if(number>=0){
+            responseObserver.onNext(SquareRootResponse.newBuilder().setResponse((long) Math.sqrt(number)).build());
+            responseObserver.onCompleted();
+        }else{
+            //Constructing the exception
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT
+                            .withDescription("Number being sent is not positive")
+                            .augmentDescription("Additional Line number sent "+number)
+                            .asRuntimeException()
+            );
+        }
     }
 }

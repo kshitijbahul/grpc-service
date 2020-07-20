@@ -40,7 +40,12 @@ message TwoWayRequest{
 message TwoWayResponse{
   string response=1;
 }
-
+message SquareRootRequest{
+  int32  number=1;
+}
+message SquareRootResponse{
+  int64  response=1;
+}
 service GreetService{
   //Unary Service
   rpc Greet(GreetingRequest) returns (GreetResponse) {};
@@ -52,4 +57,8 @@ service GreetService{
 
   //Bidirectional Streaming
   rpc TwoWayGreet(stream TwoWayRequest) returns (stream TwoWayResponse){};
+  //error handling
+  //This RPC will throw an exception when number is -ive
+  //Error being sent is of type invalid Argument
+  rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse){};
 }

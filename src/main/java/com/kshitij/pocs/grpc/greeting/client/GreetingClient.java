@@ -4,6 +4,7 @@ import com.proto.dummy.DummyServiceGrpc;
 import com.proto.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CountDownLatch;
@@ -23,7 +24,8 @@ public class GreetingClient {
         //doUnaryCall(channel);
         //doServerStreamingCall(channel);
         //doClientStreamingCall(channel);
-        doTwoWayStreaming(channel);
+        //doTwoWayStreaming(channel);
+        doSquareErrorCall(channel);
         System.out.println("Shutting down client");
         channel.shutdown();
     }
@@ -134,5 +136,15 @@ public class GreetingClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+    private static void doSquareErrorCall(ManagedChannel channel){
+        GreetServiceGrpc.GreetServiceBlockingStub blockingStub=GreetServiceGrpc.newBlockingStub(channel);
+        try{
+            blockingStub.squareRoot(SquareRootRequest.newBuilder().setNumber(-1).build());
+        }catch (StatusRuntimeException e){
+            System.out.println("Got the exception in error ");
+            e.printStackTrace();
+        }
+
     }
 }
