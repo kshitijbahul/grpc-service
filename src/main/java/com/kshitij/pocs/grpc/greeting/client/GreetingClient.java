@@ -22,10 +22,14 @@ public class GreetingClient {
                 .build();
         //doUnaryCall(channel);
         //doServerStreamingCall(channel);
-        doClientStreamingCall(channel);
+        //doClientStreamingCall(channel);
+        doTwoWayStreaming(channel);
         System.out.println("Shutting down client");
         channel.shutdown();
     }
+
+
+
     private static void doUnaryCall(ManagedChannel channel) {
         GreetServiceGrpc.GreetServiceBlockingStub greetServiceBlockingStub = GreetServiceGrpc.newBlockingStub(channel);
 
@@ -99,5 +103,36 @@ public class GreetingClient {
             e.printStackTrace();
         }
 
+    }
+    private static void doTwoWayStreaming(ManagedChannel channel) {
+        GreetServiceGrpc.GreetServiceStub asyncStub= GreetServiceGrpc.newStub(channel);
+        CountDownLatch latch= new CountDownLatch(1);
+        StreamObserver<TwoWayRequest> twoWayRequestStreamObserver=asyncStub.twoWayGreet(new StreamObserver<TwoWayResponse>() {
+            @Override
+            public void onNext(TwoWayResponse value) {
+                System.out.println("Got the response as "+value.getResponse());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Received a completed response");
+                latch.countDown();
+            }
+        });
+        twoWayRequestStreamObserver.onNext(TwoWayRequest.newBuilder().setGreeting(Greeting.newBuilder().setFirstName("Kshitij ").build()).build());
+        twoWayRequestStreamObserver.onNext(TwoWayRequest.newBuilder().setGreeting(Greeting.newBuilder().setFirstName("Kshitij 1 ").build()).build());
+        twoWayRequestStreamObserver.onNext(TwoWayRequest.newBuilder().setGreeting(Greeting.newBuilder().setFirstName("Kshitij 3 ").build()).build());
+        twoWayRequestStreamObserver.onNext(TwoWayRequest.newBuilder().setGreeting(Greeting.newBuilder().setFirstName("Kshitij 6 ").build()).build());
+        twoWayRequestStreamObserver.onCompleted();
+        try {
+            latch.await(3L,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

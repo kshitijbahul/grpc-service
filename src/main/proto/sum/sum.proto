@@ -30,8 +30,15 @@ message AverageResponse{
   int64 response=1;
 }
 
+message FindMaximumRequest{
+  int32 request=1;
+}
+message FindMaximumResponse{
+  int32 response=1;
+}
 service SumService{
   rpc AddNumbers(SumRequest) returns (SumResponse){};
   rpc PrimeNumbers(PrimeNumberRequest) returns(stream PrimeNumberResponse){};
   rpc CalculateAverage(stream AverageRequest) returns(AverageResponse){};
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse){};
 }

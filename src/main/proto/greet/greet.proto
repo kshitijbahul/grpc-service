@@ -34,6 +34,12 @@ message LongGreetResponse{
   string response=1;
 }
 
+message TwoWayRequest{
+  Greeting greeting=1;
+}
+message TwoWayResponse{
+  string response=1;
+}
 
 service GreetService{
   //Unary Service
@@ -43,4 +49,7 @@ service GreetService{
 
   //Client streaming
   rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse){};
+
+  //Bidirectional Streaming
+  rpc TwoWayGreet(stream TwoWayRequest) returns (stream TwoWayResponse){};
 }

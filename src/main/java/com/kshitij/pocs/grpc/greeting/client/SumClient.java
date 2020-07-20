@@ -7,6 +7,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 public class SumClient {
 
@@ -18,8 +19,38 @@ public class SumClient {
         ManagedChannel sumChannel=ManagedChannelBuilder.forAddress("localhost",50051).usePlaintext().build();
         //unaryCall(sumChannel);
         //serverStreamingCall(sumChannel);
-        clientStreamingCall(sumChannel);
+        //clientStreamingCall(sumChannel);
+        twoWayStreaming(sumChannel);
         sumChannel.shutdown();
+    }
+
+    private static void twoWayStreaming(ManagedChannel sumChannel) {
+        SumServiceGrpc.SumServiceStub sumServiceStub= SumServiceGrpc.newStub(sumChannel);
+        CountDownLatch waitForCompletionLatch=new CountDownLatch(1);
+        StreamObserver<FindMaximumRequest> findMaximumRequestStreamObserver=sumServiceStub.findMaximum(new StreamObserver<FindMaximumResponse>() {
+            @Override
+            public void onNext(FindMaximumResponse value) {
+                System.out.println("GOt a response , current max is "+value.getResponse());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Error occured");
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server has completed ");
+                waitForCompletionLatch.countDown();
+            }
+        });
+        IntStream.range(1,100).forEach(number->findMaximumRequestStreamObserver.onNext(FindMaximumRequest.newBuilder().setRequest(number).build()));
+        findMaximumRequestStreamObserver.onCompleted();
+        try {
+            waitForCompletionLatch.await(3L,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void clientStreamingCall(ManagedChannel sumChannel) {

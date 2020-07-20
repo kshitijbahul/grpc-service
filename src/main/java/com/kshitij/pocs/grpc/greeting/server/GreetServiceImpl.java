@@ -65,4 +65,27 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
         };
         return requestObserver;
     }
+
+    @Override
+    public StreamObserver<TwoWayRequest> twoWayGreet(StreamObserver<TwoWayResponse> responseObserver) {
+        StreamObserver<TwoWayRequest> twoWayRequestStreamObserver= new StreamObserver<TwoWayRequest>() {
+            @Override
+            public void onNext(TwoWayRequest value) {
+                //got a message
+                System.out.println("Got a message and  reploying ");
+                responseObserver.onNext(TwoWayResponse.newBuilder().setResponse("Got this in the Request, pinging back "+value.getGreeting().getFirstName()).build());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Got a completed request ");
+                responseObserver.onCompleted();//Mark te process as completed
+            }
+        };
+        return twoWayRequestStreamObserver;
+    }
 }
