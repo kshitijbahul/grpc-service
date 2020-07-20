@@ -19,6 +19,7 @@ public class GreetingServer {
             System.out.println("Received Shutdown request ");
             server.shutdown();
             System.out.println("Successfully stopped the server");
+
         }));
         server.awaitTermination();//This is meant to blocking in the MAin thread
     }

@@ -23,7 +23,15 @@ message PrimeNumberResponse{
   int32 response=1;
 }
 
+message AverageRequest{
+  int32 number=1;
+}
+message AverageResponse{
+  int64 response=1;
+}
+
 service SumService{
   rpc AddNumbers(SumRequest) returns (SumResponse){};
-  rpc PrimeNumbers(PrimeNumberRequest) returns(stream PrimeNumberResponse){}
+  rpc PrimeNumbers(PrimeNumberRequest) returns(stream PrimeNumberResponse){};
+  rpc CalculateAverage(stream AverageRequest) returns(AverageResponse){};
 }

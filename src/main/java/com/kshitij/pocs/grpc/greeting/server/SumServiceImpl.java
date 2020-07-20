@@ -38,4 +38,33 @@ public class SumServiceImpl extends SumServiceGrpc.SumServiceImplBase {
         }
         responseObserver.onCompleted();
     }
+
+    @Override
+    public StreamObserver<AverageRequest> calculateAverage(StreamObserver<AverageResponse> responseObserver) {
+
+        StreamObserver<AverageRequest> averageRequestStreamObserver= new StreamObserver<AverageRequest>() {
+            Integer countOfElements=0;
+            Long sum=0L;
+
+            @Override
+            public void onNext(AverageRequest value) {
+                    sum+=value.getNumber();
+                    countOfElements++;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("recieved the signal that request is completed ");
+                System.out.println("Sum is  "+sum);
+                System.out.println("Count is  "+countOfElements);
+                responseObserver.onNext(AverageResponse.newBuilder().setResponse(sum/countOfElements).build());
+            }
+        };
+        return averageRequestStreamObserver;
+    }
 }
