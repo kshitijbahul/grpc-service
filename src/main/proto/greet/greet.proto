@@ -46,6 +46,15 @@ message SquareRootRequest{
 message SquareRootResponse{
   int64  response=1;
 }
+
+message GreetWithDeadlineRequest{
+  Greeting greeting=1;
+}
+message GreetWithDeadlineResponse{
+  string response=1;
+}
+
+
 service GreetService{
   //Unary Service
   rpc Greet(GreetingRequest) returns (GreetResponse) {};
@@ -57,8 +66,13 @@ service GreetService{
 
   //Bidirectional Streaming
   rpc TwoWayGreet(stream TwoWayRequest) returns (stream TwoWayResponse){};
+
   //error handling
   //This RPC will throw an exception when number is -ive
   //Error being sent is of type invalid Argument
   rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse){};
+
+  //call with RPC
+  //This RPC will complete in no less than 300 ms
+  rpc GreetWithDeadline(GreetWithDeadlineRequest) returns (GreetWithDeadlineResponse) {};
 }

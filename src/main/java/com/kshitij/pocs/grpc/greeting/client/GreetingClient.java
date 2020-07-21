@@ -2,33 +2,44 @@ package com.kshitij.pocs.grpc.greeting.client;
 
 import com.proto.dummy.DummyServiceGrpc;
 import com.proto.greet.*;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
+import io.grpc.*;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class GreetingClient {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SSLException {
         System.out.println("Hello gRPC client");
         run();
     }
-    public static void run(){
+    public static void run() throws SSLException {
         //creating a Channel
         ManagedChannel channel = ManagedChannelBuilder
                 .forAddress("localhost",50051)
                 .usePlaintext()
                 .build();
-        //doUnaryCall(channel);
+        ManagedChannel securedChannel = NettyChannelBuilder//Use Netty  for Secured
+                .forAddress("localhost",50051)
+                .sslContext(GrpcSslContexts.forClient().trustManager(new File("ssl/ca.crt")).build())//pass the certificate to the system
+                .build();
+
+        doUnaryCall(securedChannel);
         //doServerStreamingCall(channel);
         //doClientStreamingCall(channel);
         //doTwoWayStreaming(channel);
-        doSquareErrorCall(channel);
+        //doSquareErrorCall(channel);
+        //doUnaryCallWithDeadline(channel);
+        //doUnaryCallWithDeadline(channel);
+        //doUnaryCallWithDeadlineExceeded(channel);
         System.out.println("Shutting down client");
         channel.shutdown();
     }
+
 
 
 
@@ -144,6 +155,48 @@ public class GreetingClient {
         }catch (StatusRuntimeException e){
             System.out.println("Got the exception in error ");
             e.printStackTrace();
+        }
+
+    }
+    private static void doUnaryCallWithDeadline(ManagedChannel channel) {
+        GreetServiceGrpc.GreetServiceBlockingStub blockingStub=GreetServiceGrpc.newBlockingStub(channel);
+
+        //setting a deadline
+        try{
+            GreetWithDeadlineResponse greetWithDeadlineResponse=
+            blockingStub.withDeadline(Deadline.after(1500,TimeUnit.MILLISECONDS))
+                    .greetWithDeadline(GreetWithDeadlineRequest.newBuilder()
+                            .setGreeting(Greeting.newBuilder().setFirstName("Kshitij ").build())
+                            .build());
+            System.out.println("got the response as "+greetWithDeadlineResponse.getResponse());
+        }catch (StatusRuntimeException e){
+            if (e.getStatus().equals(Status.DEADLINE_EXCEEDED)){
+                System.out.println("Deadline is exceeded");
+            }else{
+                System.out.println("Some other exception");
+                e.printStackTrace();
+            }
+        }
+
+    }
+    private static void doUnaryCallWithDeadlineExceeded(ManagedChannel channel) {
+        GreetServiceGrpc.GreetServiceBlockingStub blockingStub=GreetServiceGrpc.newBlockingStub(channel);
+
+        //setting a deadline
+        try{
+            GreetWithDeadlineResponse greetWithDeadlineResponse=
+                    blockingStub.withDeadline(Deadline.after(100,TimeUnit.MILLISECONDS))
+                            .greetWithDeadline(GreetWithDeadlineRequest.newBuilder()
+                                    .setGreeting(Greeting.newBuilder().setFirstName("Kshitij ").build())
+                                    .build());
+            System.out.println("got the response as "+greetWithDeadlineResponse.getResponse());
+        }catch (StatusRuntimeException e){
+            if (e.getStatus().equals(Status.DEADLINE_EXCEEDED)){
+                System.out.println("Deadline is exceeded");
+            }else{
+                System.out.println("Some other exception");
+                e.printStackTrace();
+            }
         }
 
     }

@@ -1,6 +1,7 @@
 package com.kshitij.pocs.grpc.greeting.server;
 
 import com.proto.greet.*;
+import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
@@ -104,6 +105,27 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
                             .augmentDescription("Additional Line number sent "+number)
                             .asRuntimeException()
             );
+        }
+    }
+
+    @Override
+    public void greetWithDeadline(GreetWithDeadlineRequest request, StreamObserver<GreetWithDeadlineResponse> responseObserver) {
+        Context context=Context.current();//Getting current context
+        try{
+            for(int i=0;i<3;i++){
+                if(!context.isCancelled()){
+                    System.out.println("Sleeping for 100ms");
+                    Thread.sleep(100);
+                }else{
+                    System.out.println("Client cancelled");
+                    return;
+                }
+            }
+            System.out.println("Sendign a response");
+            responseObserver.onNext(GreetWithDeadlineResponse.newBuilder().setResponse("Hello "+request.getGreeting().getFirstName()).build());
+            responseObserver.onCompleted();
+        }catch (InterruptedException e){
+            e.printStackTrace();
         }
     }
 }

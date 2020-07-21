@@ -2,3 +2,7 @@
 build/
 .gradle/
 out/
+ssl/*.crt
+ssl/*.key
+ssl/*.pem
+ssl/*.csr
