@@ -2,6 +2,7 @@ package com.kshitij.pocs.grpc.greeting.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class GreetingServer {
                 .useTransportSecurity(new File("ssl/server.crt"),new File("ssl/server.pem"))//add server security
                 .addService(new GreetServiceImpl())
                 .addService(new SumServiceImpl())//Adding the Sum Service to the server
+                .addService(ProtoReflectionService.newInstance())//Adding reflection to the services
                 .build();
         server.start();//Start The server
         //Add a shutdown hook
